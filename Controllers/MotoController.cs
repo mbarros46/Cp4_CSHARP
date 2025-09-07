@@ -1,10 +1,6 @@
-using c_.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Application.DTOs;
 using Application.Services;
-using System.Net;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Numerics;
 
 
 namespace MottuCrudAPI.Controllers
