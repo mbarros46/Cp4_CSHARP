@@ -1,7 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using MottuCrudAPI.Infrastructure;
 using System.Reflection;
+using Application.Mappings;
+using Application.Services;
+using Application.Validation;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Infrastructure.EF;
+using Infrastructure.Repositories;
+using Domain.Repositories;
 
 namespace MottuCrudAPI
 {
@@ -39,21 +46,41 @@ namespace MottuCrudAPI
                 c.IncludeXmlComments(xmlPath);
             });
 
+
+            // EF
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
+                // Ajuste para Oracle ou SQL Server conforme necessário
                 options.UseOracle(builder.Configuration.GetConnectionString("Oracle"));
+                // Exemplo para SQL Server:
+                // options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
             });
+
+            // AutoMapper
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+            // FluentValidation
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<MotoRequestValidator>();
+
+            // Repositórios e UoW
+            builder.Services.AddScoped<IMotoRepository, MotoRepository>();
+            builder.Services.AddScoped<IPatioRepository, PatioRepository>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Services
+            builder.Services.AddScoped<MotoService>();
+            builder.Services.AddScoped<PatioService>();
 
             var app = builder.Build();
 
             // Deve estar antes do UseAuthorization e MapControllers
             app.UseCors("AllowLocalhost");
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+
+            // Swagger sempre disponível
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 
