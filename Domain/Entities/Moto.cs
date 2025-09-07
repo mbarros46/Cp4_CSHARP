@@ -13,7 +13,7 @@ public class Moto
     public Guid? PatioId { get; private set; }
     public Patio Patio { get; private set; }
 
-    private Moto(string modelo, string placa, string status, int ano, Guid? patioId = null)
+        public Moto(string modelo, string placa, string status, int ano, Guid? patioId = null)
     {
         ValidateModelo(modelo);
         ValidatePlaca(placa);

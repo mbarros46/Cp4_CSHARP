@@ -1,6 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
-using Infrastructure.Mappings;
+using Infrastructure.EF.Config;
 using Domain.Entities;
 
 namespace Infrastructure.EF;
