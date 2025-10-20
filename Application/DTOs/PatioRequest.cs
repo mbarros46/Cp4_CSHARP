@@ -2,7 +2,7 @@ namespace Application.DTOs;
 
 public class PatioRequest
 {
-    public string Nome { get; set; }
-    public string Endereco { get; set; }
+    public required string Nome { get; set; }
+    public required string Endereco { get; set; }
     public int Capacidade { get; set; }
 }

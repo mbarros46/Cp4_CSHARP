@@ -2,9 +2,9 @@ namespace Application.DTOs;
 
 public class MotoRequest
 {
-    public string Modelo { get; set; }
-    public string Placa { get; set; }
-    public string Status { get; set; }
+    public required string Modelo { get; set; }
+    public required string Placa { get; set; }
+    public required string Status { get; set; }
     public int Ano { get; set; }
     public Guid? PatioId { get; set; }
 
