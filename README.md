@@ -5,7 +5,7 @@
 - RM556652 - Miguel Barros
 - RM558042 - Thomas Rodrigues
 - RM556826 - Pedro Valentim
-
+- RM554727 - Victor Rocha
 
 ## 📝 Descrição do Projeto e Objetivo do CP5
 
