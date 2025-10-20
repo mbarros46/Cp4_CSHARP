@@ -6,7 +6,8 @@ using Application.Services;
 namespace MottuCrudAPI.Controllers
 {
     [ApiController]
-    [Route("api/motos")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/motos")]
     [Tags("Motos")]
     public class MotoController : ControllerBase
     {

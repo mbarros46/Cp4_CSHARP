@@ -5,7 +5,8 @@ using Application.Services;
 namespace MottuCrudAPI.Controllers
 {
     [ApiController]
-    [Route("api/patios")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/patios")]
     [Tags("Pátios")]
     public class PatioController : ControllerBase
     {
