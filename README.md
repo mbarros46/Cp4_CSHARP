@@ -1,37 +1,77 @@
-# Cp4_CSHARP
+# Mottu Fleet API (CP5 - 2TDS)
 
 ## 👥 Integrantes
 
 - RM556652 - Miguel Barros
 - RM558042 - Thomas Rodrigues
-- RM556826 - Pedro Valentim 
+- RM556826 - Pedro Valentim
 
 
-## 📝 Descrição do Domínio
+## 📝 Descrição do Projeto e Objetivo do CP5
 
-O sistema gerencia motos e pátios para uma empresa de mobilidade urbana. Permite cadastrar motos (modelo, placa, status, ano, pátio) e pátios (nome, endereço, capacidade, ocupação), controlando a alocação das motos nos pátios e garantindo regras de negócio como capacidade máxima e validação de dados.
+API de exemplo para gestão de motocicletas e pátios. O objetivo do CP5 é implementar um backend completo que permita cadastrar, listar, atualizar e remover recursos do domínio, além de demonstrar integrações com bases relacionais e não-relacionais, validação, mapeamento e documentação.
 
-### Entidades principais
-- **Moto**: Id, Modelo, Placa, Status, Ano, PatioId (opcional)
-- **Pátio**: Id, Nome, Endereco, Capacidade, OcupacaoAtual
+## 🚀 Como executar (mínimos obrigatórios)
 
-## 🚀 Instruções de Execução
+Pré-requisitos:
+- .NET SDK 8.0+
+- (Opcional, recomendado) Docker para executar MongoDB localmente
 
-1. **Restaurar dependências:**
-	 ```sh
-	 dotnet restore
-	 ```
-2. **Gerar/atualizar o banco de dados:**
-	 ```sh
-	 dotnet ef database update
-	 ```
-3. **Executar a aplicação:**
-	 ```sh
-	 dotnet run
-	 ```
-4. Acesse a documentação Swagger em: `https://localhost:7208/swagger` (ou porta configurada)
+Exemplo rápido com Docker para MongoDB:
 
-## 📦 Exemplos de Requisições
+```powershell
+docker run -d --name mongodb -p 27017:27017 mongo:6.0
+```
+
+String de conexão (usar em `appsettings.json` → `Mongo:ConnectionString`):
+
+```
+mongodb://localhost:27017
+```
+
+Executando a aplicação:
+
+```powershell
+dotnet restore
+dotnet build
+dotnet run
+```
+
+Ao rodar, verifique a URL de escuta informada no console (ex.: http://localhost:5000).
+
+## Swagger e versão
+
+- Swagger UI disponível em: `/docs` (documenta a versão `v1`).
+  - Ex.: `http://localhost:5000/docs`
+
+## Health checks
+
+- `/health` — status geral da aplicação
+- `/health/live` — liveness probe (se a aplicação está viva)
+- `/health/ready` — readiness probe (se a aplicação está pronta para receber tráfego)
+
+Esses endpoints são úteis para orquestradores e monitoramento.
+
+## Estrutura de pastas (resumo das camadas)
+
+- `Controllers/` — endpoints HTTP
+- `Application/` — DTOs, services, validações e mapeamentos
+- `Domain/` — entidades, enums e interfaces de repositório
+- `Infrastructure/` — implementações de persistência e integrações
+  - `Infrastructure/Mongo` — MongoSettings, MongoDbContext, MongoMotoRepository, extensões de serviço
+  - `Infrastructure/EF` — contexto EF para Oracle
+- `Program.cs` — configuração de DI, HealthChecks, API Versioning e Swagger
+
+## Commits semânticos
+
+Foram utilizados commits semânticos (ex.: `feat:`, `fix:`, `chore:`, `refactor:`) para manter o histórico organizado.
+
+## Observações finais
+
+- A implementação atual utiliza MongoDB para armazenar motos (via `MongoMotoRepository`) e EF/Oracle para outras entidades como pátios.
+- Posso adicionar um `docker-compose.yml` para facilitar testes locais (subindo a API e o Mongo juntos). Caso queira, posso criar.
+
+## Conteúdo original (exemplos de requisições)
 
 ### Motos
 
@@ -50,11 +90,11 @@ GET /api/motos/{id}
 POST /api/motos
 Content-Type: application/json
 {
-	"modelo": "Honda CG 160",
-	"placa": "ABC1234",
-	"status": "Active",
-	"ano": 2024,
-	"patioId": "GUID_DO_PATIO"
+    "modelo": "Honda CG 160",
+    "placa": "ABC1234",
+    "status": "Active",
+    "ano": 2024,
+    "patioId": "GUID_DO_PATIO"
 }
 ```
 
@@ -63,11 +103,11 @@ Content-Type: application/json
 PUT /api/motos/{id}
 Content-Type: application/json
 {
-	"modelo": "Honda CG 160",
-	"placa": "DEF5678",
-	"status": "Inactive",
-	"ano": 2023,
-	"patioId": "GUID_DO_PATIO"
+    "modelo": "Honda CG 160",
+    "placa": "DEF5678",
+    "status": "Inactive",
+    "ano": 2023,
+    "patioId": "GUID_DO_PATIO"
 }
 ```
 
@@ -93,9 +133,9 @@ GET /api/patios/{id}
 POST /api/patios
 Content-Type: application/json
 {
-	"nome": "Pátio Central",
-	"endereco": "Rua Principal, 123",
-	"capacidade": 100
+    "nome": "Pátio Central",
+    "endereco": "Rua Principal, 123",
+    "capacidade": 100
 }
 ```
 
@@ -104,9 +144,9 @@ Content-Type: application/json
 PUT /api/patios/{id}
 Content-Type: application/json
 {
-	"nome": "Pátio Central",
-	"endereco": "Rua Nova, 456",
-	"capacidade": 120
+    "nome": "Pátio Central",
+    "endereco": "Rua Nova, 456",
+    "capacidade": 120
 }
 ```
 
