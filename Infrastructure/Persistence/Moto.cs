@@ -9,9 +9,9 @@ public class Moto
     public string Status { get; private set; }
     public int Ano { get; private set; }
 
-    // relacionamento com pátio
+    // relacionamento com pï¿½tio
     public Guid? PatioId { get; private set; }
-    public Patio Patio { get; private set; }
+    public Patio? Patio { get; private set; }
 
     private Moto(string modelo, string placa, string status, int ano, Guid? patioId = null)
     {
@@ -50,13 +50,13 @@ public class Moto
     private void ValidateModelo(string modelo)
     {
         if (string.IsNullOrWhiteSpace(modelo))
-            throw new ArgumentException("Modelo não pode ser nulo ou vazio.");
+            throw new ArgumentException("Modelo nï¿½o pode ser nulo ou vazio.");
     }
 
     private void ValidatePlaca(string placa)
     {
         if (string.IsNullOrWhiteSpace(placa))
-            throw new ArgumentException("Placa não pode ser nula ou vazia.");
+            throw new ArgumentException("Placa nï¿½o pode ser nula ou vazia.");
 
         if (placa.Length != 7)
             throw new ArgumentException("Placa deve conter exatamente 7 caracteres.");
@@ -65,7 +65,7 @@ public class Moto
     private void ValidateStatus(string status)
     {
         if (string.IsNullOrWhiteSpace(status))
-            throw new ArgumentException("Status não pode ser nulo ou vazio.");
+            throw new ArgumentException("Status nï¿½o pode ser nulo ou vazio.");
     }
 
     private void ValidateAno(int ano)

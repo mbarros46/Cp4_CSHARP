@@ -11,7 +11,7 @@ public class Moto
 
     // relacionamento com pátio
     public Guid? PatioId { get; private set; }
-    public Patio Patio { get; private set; }
+    public Patio? Patio { get; private set; }
 
         public Moto(string modelo, string placa, string status, int ano, Guid? patioId = null)
     {
