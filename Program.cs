@@ -91,7 +91,7 @@ namespace MottuCrudAPI
                 c.IncludeXmlComments(xmlPath);
             });
 
-            // MongoDB registration
+            // MongoDB registration (Mongo infrastructure registers health checks)
             var mongoSection = builder.Configuration.GetSection("Mongo");
             var mongoConn = mongoSection.GetValue<string>("ConnectionString");
             var mongoDbName = mongoSection.GetValue<string>("Database");
@@ -103,13 +103,6 @@ namespace MottuCrudAPI
                 {
                     builder.Services.AddSingleton(sp => sp.GetRequiredService<IMongoClient>().GetDatabase(mongoDbName));
                 }
-            }
-
-            // HealthChecks - MongoDB (uses connection string)
-            if (!string.IsNullOrEmpty(mongoConn))
-            {
-                builder.Services.AddHealthChecks()
-                    .AddMongoDb(mongoConn, name: "mongodb");
             }
 
 
