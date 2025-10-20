@@ -9,6 +9,12 @@ using FluentValidation.AspNetCore;
 using Infrastructure.EF;
 using Infrastructure.Repositories;
 using Domain.Repositories;
+using MongoDB.Driver;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Infrastructure.Mongo;
 
 namespace MottuCrudAPI
 {
@@ -19,6 +25,26 @@ namespace MottuCrudAPI
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
+
+            // ===== CP5: Mongo Infrastructure + HealthChecks =====
+            builder.Services.AddMongoInfrastructure(builder.Configuration);
+            var mongoSettings = new MongoSettings();
+            builder.Configuration.GetSection("Mongo").Bind(mongoSettings);
+            builder.Services.AddAppAndMongoHealthChecks(mongoSettings);
+
+            // ===== CP5: API Versioning =====
+            builder.Services.AddApiVersioning(setup =>
+            {
+                setup.DefaultApiVersion = new ApiVersion(1, 0);
+                setup.AssumeDefaultVersionWhenUnspecified = true;
+                setup.ReportApiVersions = true;
+                setup.ApiVersionReader = new UrlSegmentApiVersionReader(); // /api/v{version}/...
+            });
+            builder.Services.AddVersionedApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
 
             builder.Services.AddCors(options =>
             {
@@ -31,20 +57,60 @@ namespace MottuCrudAPI
                     });
             });
 
+            // Read Swagger metadata from configuration
+            var swaggerConfig = builder.Configuration.GetSection("Swagger");
+            var swaggerTitle = swaggerConfig.GetValue<string>("Title") ?? "Mottu API";
+            var swaggerDescription = swaggerConfig.GetValue<string>("Description") ?? "API para gerenciamento de motos e pátios da Mottu";
+            var swaggerVersion = swaggerConfig.GetValue<string>("Version") ?? "v1";
+
+            // API Versioning + ApiExplorer
+            builder.Services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+            });
+            builder.Services.AddVersionedApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo
+                c.SwaggerDoc(swaggerVersion, new OpenApiInfo
                 {
-                    Title = "Mottu API",
-                    Version = "v1",
-                    Description = "API para gerenciamento de motos e pátios da Mottu",
+                    Title = swaggerTitle,
+                    Version = swaggerVersion,
+                    Description = swaggerDescription,
                 });
 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+
+            // MongoDB registration
+            var mongoSection = builder.Configuration.GetSection("Mongo");
+            var mongoConn = mongoSection.GetValue<string>("ConnectionString");
+            var mongoDbName = mongoSection.GetValue<string>("Database");
+            if (!string.IsNullOrEmpty(mongoConn))
+            {
+                var mongoClient = new MongoClient(mongoConn);
+                builder.Services.AddSingleton<IMongoClient>(mongoClient);
+                if (!string.IsNullOrEmpty(mongoDbName))
+                {
+                    builder.Services.AddSingleton(sp => sp.GetRequiredService<IMongoClient>().GetDatabase(mongoDbName));
+                }
+            }
+
+            // HealthChecks - MongoDB (uses connection string)
+            if (!string.IsNullOrEmpty(mongoConn))
+            {
+                builder.Services.AddHealthChecks()
+                    .AddMongoDb(mongoConn, name: "mongodb");
+            }
 
 
             // EF
@@ -64,7 +130,7 @@ namespace MottuCrudAPI
             builder.Services.AddValidatorsFromAssemblyContaining<MotoRequestValidator>();
 
             // Repositórios e UoW
-            builder.Services.AddScoped<IMotoRepository, MotoRepository>();
+            // IMotoRepository agora é registrado por AddMongoInfrastructure (MongoMotoRepository)
             builder.Services.AddScoped<IPatioRepository, PatioRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -77,16 +143,40 @@ namespace MottuCrudAPI
             // Deve estar antes do UseAuthorization e MapControllers
             app.UseCors("AllowLocalhost");
 
+            // Health checks endpoint
+            app.MapHealthChecks("/health", new HealthCheckOptions
+            {
+                ResponseWriter = async (context, report) =>
+                {
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        status = report.Status.ToString(),
+                        results = report.Entries.Select(e => new { key = e.Key, status = e.Value.Status.ToString(), description = e.Value.Description })
+                    }));
+                }
+            });
 
-            // Swagger sempre disponível
+            // Swagger + Versioning UI (rota /docs)
+            var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
             app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Mottu Fleet API v1");
+                options.RoutePrefix = "docs";
+                options.DocumentTitle = "Mottu Fleet API Docs";
+            });
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
             app.MapControllers();
+
+            // Health endpoints
+            app.MapHealthChecks("/health");
+            app.MapHealthChecks("/health/live");
+            app.MapHealthChecks("/health/ready");
 
             app.Run();
         }
