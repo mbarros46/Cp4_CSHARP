@@ -9,6 +9,33 @@ services:
     volumes:
       - mongo-data:/data/db
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.runCommand({ ping: 1 }).ok' | mongo --quiet localhost:27017/test || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mottu_api
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "5049:5049"
+    environment:
+      - ASPNETCORE_URLS=http://+:5049
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Mongo__ConnectionString=mongodb://mongo:27017
+      - Mongo__Database=mottu_cp5_db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5049/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mongo-data:

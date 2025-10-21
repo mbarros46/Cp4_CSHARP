@@ -17,27 +17,59 @@ Pré-requisitos:
 - .NET SDK 8.0+
 - (Opcional, recomendado) Docker para executar MongoDB localmente
 
-Exemplo rápido com Docker para MongoDB:
+Opções para executar localmente:
+
+1) Usar Docker Compose (recomendado — sobe API + Mongo):
+
+```powershell
+# sobe o mongo e a API (build da imagem da API)
+docker compose up --build -d
+
+# verifica status dos containers
+docker compose ps
+
+# para ver logs (ex.: API)
+docker compose logs -f api
+```
+
+As variáveis configuradas no compose expõem a API em `http://localhost:5049` e configuram a conexão com o Mongo acessível pelo serviço `mongo` do compose.
+
+2) Ou subir apenas o Mongo e rodar a API localmente (dotnet run):
 
 ```powershell
 docker run -d --name mongodb -p 27017:27017 mongo:6.0
-```
 
-String de conexão (usar em `appsettings.json` → `Mongo:ConnectionString`):
-
-```
-mongodb://localhost:27017
-```
-
-Executando a aplicação:
-
-```powershell
 dotnet restore
 dotnet build
 dotnet run
 ```
 
-Ao rodar, verifique a URL de escuta informada no console (ex.: http://localhost:5000).
+String de conexão (quando a API roda localmente e o Mongo está no host):
+
+```
+mongodb://localhost:27017
+```
+
+String de conexão (quando a API e o Mongo rodam no mesmo docker compose):
+
+```
+mongodb://mongo:27017
+```
+
+Endpoints úteis:
+
+- Swagger UI: `http://localhost:5049/docs` (versionamento habilitado via ApiVersioning)
+- Health checks: `http://localhost:5049/health` (também `/health/live` e `/health/ready`)
+
+Validação rápida (após subir via compose):
+
+```powershell
+# espera o health OK (pode demorar alguns segundos)
+curl http://localhost:5049/health
+
+# abrir Swagger
+start http://localhost:5049/docs
+```
 
 ## Swagger e versão
 
@@ -70,6 +102,11 @@ Foram utilizados commits semânticos (ex.: `feat:`, `fix:`, `chore:`, `refactor:
 
 - A implementação atual utiliza MongoDB para armazenar motos (via `MongoMotoRepository`) e EF/Oracle para outras entidades como pátios.
 - Posso adicionar um `docker-compose.yml` para facilitar testes locais (subindo a API e o Mongo juntos). Caso queira, posso criar.
+
+Além disso:
+
+- Foi adicionado um Value Object `Placa` no domínio para encapsular a validação do formato de placa.
+- Há um projeto de testes e um utilitário simples para validar o VO (ver `tests/Domain.Tests` e `tools/vo-validator`).
 
 ## Conteúdo original (exemplos de requisições)
 

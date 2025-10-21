@@ -11,6 +11,9 @@
 	<ItemGroup>
 		<Content Remove="appsettings.Development1.Development.json" />
 		<Content Remove="appsettings.Development1.json" />
+		<!-- Exclude test sources and tools from the main project build -->
+		<Compile Remove="tests\**\*.cs" />
+		<None Remove="tests\**\*.*" />
 	</ItemGroup>
 
 	<ItemGroup>

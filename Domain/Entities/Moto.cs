@@ -16,13 +16,14 @@ public class Moto
         public Moto(string modelo, string placa, string status, int ano, Guid? patioId = null)
     {
         ValidateModelo(modelo);
-        ValidatePlaca(placa);
+            // use Value Object validation
+            var placaVo = new Domain.ValueObjects.Placa(placa);
         ValidateStatus(status);
         ValidateAno(ano);
 
-        Id = Guid.NewGuid();
-        Modelo = modelo;
-        Placa = placa;
+    Id = Guid.NewGuid();
+    Modelo = modelo;
+    Placa = placaVo.Value; // normalized by VO
         Status = status;
         Ano = ano;
         PatioId = patioId;
@@ -33,15 +34,16 @@ public class Moto
         return new Moto(modelo, placa, status, ano, patioId);
     }
 
-    public void AtualizarDados(string modelo, string placa, string status, int ano, Guid? patioId = null)
+        public void AtualizarDados(string modelo, string placa, string status, int ano, Guid? patioId = null)
     {
         ValidateModelo(modelo);
-        ValidatePlaca(placa);
+            // use VO validation
+            var placaVo = new Domain.ValueObjects.Placa(placa);
         ValidateStatus(status);
         ValidateAno(ano);
 
-        Modelo = modelo;
-        Placa = placa;
+    Modelo = modelo;
+    Placa = placaVo.Value; // normalized by VO
         Status = status;
         Ano = ano;
         PatioId = patioId;

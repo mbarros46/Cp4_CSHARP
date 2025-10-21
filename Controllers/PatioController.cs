@@ -6,6 +6,7 @@ namespace MottuCrudAPI.Controllers
 {
     [ApiController]
     [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/patios")]
     [Tags("Pátios")]
     public class PatioController : ControllerBase
@@ -14,11 +15,14 @@ namespace MottuCrudAPI.Controllers
         public PatioController(PatioService svc) => _svc = svc;
 
         [HttpGet]
+        [ProducesResponseType(typeof(List<PatioResponse>), StatusCodes.Status200OK)]
         public async Task<ActionResult<List<PatioResponse>>> Get(CancellationToken ct)
             => Ok(await _svc.ListAsync(ct));
 
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<PatioResponse>> Get(Guid id, CancellationToken ct)
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(PatioResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PatioResponse>> Get(Guid id, CancellationToken ct)
         {
             var list = await _svc.ListAsync(ct);
             var patio = list.FirstOrDefault(x => x.Id == id);
@@ -27,6 +31,8 @@ namespace MottuCrudAPI.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(typeof(PatioResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<PatioResponse>> Post([FromBody] PatioRequest dto, CancellationToken ct)
         {
             var created = await _svc.CreateAsync(dto, ct);
@@ -34,6 +40,8 @@ namespace MottuCrudAPI.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [ProducesResponseType(typeof(PatioResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<PatioResponse>> Put(Guid id, [FromBody] PatioRequest dto, CancellationToken ct)
         {
             var updated = await _svc.UpdateAsync(id, dto, ct);
@@ -42,6 +50,8 @@ namespace MottuCrudAPI.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
             var ok = await _svc.DeleteAsync(id, ct);

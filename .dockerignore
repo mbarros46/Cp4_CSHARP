@@ -1,0 +1,15 @@
+bin/
+obj/
+**/bin/
+**/obj/
+.vs/
+*.db
+*.log
+docker-compose*.yml
+Dockerfile.*
+*.user
+*.suo
+node_modules/
+*.git
+.git/
+*.gitignore
