@@ -18,6 +18,15 @@ public class MotoRepository : IMotoRepository
     public Task AddAsync(Moto entity, CancellationToken ct) =>
         _ctx.Motos.AddAsync(entity, ct).AsTask();
 
-    public void Update(Moto entity) => _ctx.Motos.Update(entity);
-    public void Remove(Moto entity) => _ctx.Motos.Remove(entity);
+    public Task UpdateAsync(Moto entity)
+    {
+        _ctx.Motos.Update(entity);
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveAsync(Moto entity)
+    {
+        _ctx.Motos.Remove(entity);
+        return Task.CompletedTask;
+    }
 }
