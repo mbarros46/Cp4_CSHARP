@@ -15,11 +15,22 @@ namespace MottuCrudAPI.Controllers
         private readonly MotoService _svc;
         public MotoController(MotoService svc) => _svc = svc;
 
+        /// <summary>
+        /// Lista todas as motos cadastradas.
+        /// </summary>
+        /// <remarks>
+        /// Retorna uma lista com as motos existentes no sistema.
+        /// </remarks>
         [HttpGet]
         [ProducesResponseType(typeof(List<MotoResponse>), StatusCodes.Status200OK)]
         public async Task<ActionResult<List<MotoResponse>>> Get(CancellationToken ct)
             => Ok(await _svc.ListAsync(ct));
 
+    /// <summary>
+    /// Obtém uma moto pelo seu identificador.
+    /// </summary>
+    /// <param name="id">Identificador da moto (GUID)</param>
+    /// <param name="ct">Token de cancelamento</param>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(MotoResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -31,6 +42,11 @@ namespace MottuCrudAPI.Controllers
             return Ok(moto);
         }
 
+    /// <summary>
+    /// Cria uma nova moto.
+    /// </summary>
+    /// <param name="dto">Dados da moto a ser criada</param>
+    /// <param name="ct">Token de cancelamento</param>
         [HttpPost]
         [ProducesResponseType(typeof(MotoResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -40,6 +56,12 @@ namespace MottuCrudAPI.Controllers
             return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
         }
 
+    /// <summary>
+    /// Atualiza os dados de uma moto existente.
+    /// </summary>
+    /// <param name="id">Identificador da moto</param>
+    /// <param name="dto">Dados atualizados</param>
+    /// <param name="ct">Token de cancelamento</param>
         [HttpPut("{id:guid}")]
         [ProducesResponseType(typeof(MotoResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -50,6 +72,11 @@ namespace MottuCrudAPI.Controllers
             return Ok(updated);
         }
 
+    /// <summary>
+    /// Remove uma moto pelo identificador.
+    /// </summary>
+    /// <param name="id">Identificador da moto</param>
+    /// <param name="ct">Token de cancelamento</param>
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
