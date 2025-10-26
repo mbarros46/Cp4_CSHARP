@@ -30,7 +30,7 @@ public class MotoService
         var entity = await _repo.GetByIdAsync(id, ct);
         if (entity is null) return null;
         entity.AtualizarDados(dto.Modelo, dto.Placa, dto.Status, dto.Ano, dto.PatioId);
-    _repo.Update(entity);
+        await _repo.UpdateAsync(entity);
         return _mapper.Map<MotoResponse>(entity);
     }
 
@@ -38,7 +38,7 @@ public class MotoService
     {
         var entity = await _repo.GetByIdAsync(id, ct);
         if (entity is null) return false;
-    _repo.Remove(entity);
+    await _repo.RemoveAsync(entity);
         return true;
     }
 }

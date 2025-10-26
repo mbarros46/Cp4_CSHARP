@@ -1,7 +1,22 @@
+# Visual Studio user files
 .vs/
-bin/
-obj/
+
+# Build outputs
+/bin/
+/obj/
+
+# Project user files
 c#.csproj.user
 *.suo
-*.vscode
-*.db
+*.user
+
+# VS Code
+/.vscode/
+
+# Local appsettings and secrets
+appsettings.Development.json
+secrets.json
+
+# OS files
+Thumbs.db
+.DS_Store

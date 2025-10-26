@@ -31,14 +31,15 @@ public sealed class MongoMotoRepository : IMotoRepository
         }
         await _ctx.Motos.InsertOneAsync(entity, cancellationToken: ct);
     }
-
-    public void Update(Moto entity)
+    public async Task UpdateAsync(Moto entity)
     {
-        _ctx.Motos.ReplaceOne(x => x.Id == entity.Id, entity);
+        // Use ReplaceOneAsync for async consistency. We intentionally do not throw if not matched
+        await _ctx.Motos.ReplaceOneAsync(x => x.Id == entity.Id, entity);
     }
 
-    public void Remove(Moto entity)
+    public async Task RemoveAsync(Moto entity)
     {
-        _ctx.Motos.DeleteOne(x => x.Id == entity.Id);
+        // Delete the document by id
+        await _ctx.Motos.DeleteOneAsync(x => x.Id == entity.Id);
     }
 }
