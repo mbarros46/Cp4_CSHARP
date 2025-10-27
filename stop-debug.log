@@ -1,0 +1,4 @@
+27/10/2025 11:54:34 - ProcessExit event fired. Stack:    at System.Environment.get_StackTrace()
+   at MottuCrudAPI.Program.<>c.<Main>b__0_11(Object s, EventArgs e) in C:\Users\migue\Downloads\cp5_scharp\Cp4_CSHARP\Program.cs:line 203
+27/10/2025 11:56:44 - ProcessExit event fired. Stack:    at System.Environment.get_StackTrace()
+   at MottuCrudAPI.Program.<>c.<Main>b__0_11(Object s, EventArgs e) in C:\Users\migue\Downloads\cp5_scharp\Cp4_CSHARP\Program.cs:line 203
