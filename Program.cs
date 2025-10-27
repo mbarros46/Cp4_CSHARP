@@ -159,6 +159,19 @@ namespace MottuCrudAPI
             app.MapHealthChecks("/health/live");
             app.MapHealthChecks("/health/ready");
 
+            // Diagnostics: capture unhandled exceptions and lifetime events to aid debugging when the host shuts down unexpectedly
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                Console.Error.WriteLine("UNHANDLED EXCEPTION: " + (e.ExceptionObject?.ToString() ?? "<null>"));
+            };
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                Console.Error.WriteLine("UNOBSERVED TASK EXCEPTION: " + e.Exception?.ToString());
+            };
+            var lifetime = app.Lifetime;
+            lifetime.ApplicationStopping.Register(() => Console.WriteLine("ApplicationStopping event fired"));
+            lifetime.ApplicationStopped.Register(() => Console.WriteLine("ApplicationStopped event fired"));
+
             app.Run();
         }
     }
