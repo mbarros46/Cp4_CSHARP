@@ -16,6 +16,9 @@
 		<!-- Exclude test sources and tools from the main project build -->
 		<Compile Remove="tests\**\*.cs" />
 		<None Remove="tests\**\*.*" />
+		<!-- Exclude helper tools (vo-validator) and other non-production code from main build -->
+		<Compile Remove="tools\**\*.cs" />
+		<None Remove="tools\**\*.*" />
 	</ItemGroup>
 
 	<ItemGroup>

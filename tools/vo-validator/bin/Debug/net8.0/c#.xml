@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>c#</name>
+    </assembly>
+    <members>
+        <member name="T:c.Migrations.Refactor_CleanArch">
+            <inheritdoc />
+        </member>
+        <member name="M:c.Migrations.Refactor_CleanArch.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:c.Migrations.Refactor_CleanArch.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:c.Migrations.Refactor_CleanArch.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>
