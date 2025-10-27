@@ -128,11 +128,21 @@ namespace MottuCrudAPI
             builder.Services.AddValidatorsFromAssemblyContaining<MotoRequestValidator>();
 
             // Repositórios e UoW
-            // IMotoRepository agora é registrado por AddMongoInfrastructure (MongoMotoRepository)
-            builder.Services.AddScoped<IPatioRepository, PatioRepository>();
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            // IMotoRepository é registrado por AddMongoInfrastructure quando a infra não é pulada.
+            if (!skipInfra)
+            {
+                builder.Services.AddScoped<IPatioRepository, PatioRepository>();
+                builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            }
+            else
+            {
+                // For isolation runs (SKIP_INFRA=1) register lightweight in-memory implementations
+                builder.Services.AddScoped<Domain.Repositories.IMotoRepository, InMemoryMotoRepository>();
+                builder.Services.AddScoped<IPatioRepository, InMemoryPatioRepository>();
+                builder.Services.AddScoped<IUnitOfWork, InMemoryUnitOfWork>();
+            }
 
-            // Services
+            // Services (always registered — repositories are either real or in-memory above)
             builder.Services.AddScoped<MotoService>();
             builder.Services.AddScoped<PatioService>();
 
