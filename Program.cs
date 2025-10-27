@@ -27,14 +27,23 @@ namespace MottuCrudAPI
             builder.Services.AddControllers();
 
             // ===== CP5: Mongo Infrastructure + HealthChecks =====
-            builder.Services.AddMongoInfrastructure(builder.Configuration);
-            var mongoSettings = new MongoSettings();
-            builder.Configuration.GetSection("Mongo").Bind(mongoSettings);
+            // Allow skipping infrastructure initialization for isolation testing via SKIP_INFRA=1
+            var skipInfra = builder.Configuration.GetValue<bool>("SkipInfra", false) || Environment.GetEnvironmentVariable("SKIP_INFRA") == "1";
             // Health checks can be skipped by setting config key "SkipHealthChecks" or env var SKIP_HEALTHCHECKS=1
             var skipHealthChecks = builder.Configuration.GetValue<bool>("SkipHealthChecks", false) || Environment.GetEnvironmentVariable("SKIP_HEALTHCHECKS") == "1";
-            if (!skipHealthChecks)
+            // If infra is skipped we must also skip health checks mapping to avoid mapping checks
+            // when no IHealthCheck services were registered (prevents InvalidOperationException).
+            if (skipInfra) skipHealthChecks = true;
+
+            var mongoSettings = new MongoSettings();
+            builder.Configuration.GetSection("Mongo").Bind(mongoSettings);
+            if (!skipInfra)
             {
-                builder.Services.AddAppAndMongoHealthChecks(mongoSettings);
+                builder.Services.AddMongoInfrastructure(builder.Configuration);
+                if (!skipHealthChecks)
+                {
+                    builder.Services.AddAppAndMongoHealthChecks(mongoSettings);
+                }
             }
 
             // ===== CP5: API Versioning =====
@@ -81,29 +90,35 @@ namespace MottuCrudAPI
                 c.SwaggerDoc("v2", new OpenApiInfo { Title = swaggerTitle, Version = "v2", Description = swaggerDescription });
             });
 
-            // MongoDB registration (Mongo infrastructure registers health checks)
-            var mongoSection = builder.Configuration.GetSection("Mongo");
-            var mongoConn = mongoSection.GetValue<string>("ConnectionString");
-            var mongoDbName = mongoSection.GetValue<string>("Database");
-            if (!string.IsNullOrEmpty(mongoConn))
+            // MongoDB registration (only if infra not skipped)
+            if (!skipInfra)
             {
-                var mongoClient = new MongoClient(mongoConn);
-                builder.Services.AddSingleton<IMongoClient>(mongoClient);
-                if (!string.IsNullOrEmpty(mongoDbName))
+                var mongoSection = builder.Configuration.GetSection("Mongo");
+                var mongoConn = mongoSection.GetValue<string>("ConnectionString");
+                var mongoDbName = mongoSection.GetValue<string>("Database");
+                if (!string.IsNullOrEmpty(mongoConn))
                 {
-                    builder.Services.AddSingleton(sp => sp.GetRequiredService<IMongoClient>().GetDatabase(mongoDbName));
+                    var mongoClient = new MongoClient(mongoConn);
+                    builder.Services.AddSingleton<IMongoClient>(mongoClient);
+                    if (!string.IsNullOrEmpty(mongoDbName))
+                    {
+                        builder.Services.AddSingleton(sp => sp.GetRequiredService<IMongoClient>().GetDatabase(mongoDbName));
+                    }
                 }
             }
 
 
-            // EF
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            // EF (only if infra not skipped)
+            if (!skipInfra)
             {
-                // Ajuste para Oracle ou SQL Server conforme necessário
-                options.UseOracle(builder.Configuration.GetConnectionString("Oracle"));
-                // Exemplo para SQL Server:
-                // options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
-            });
+                builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                {
+                    // Ajuste para Oracle ou SQL Server conforme necessário
+                    options.UseOracle(builder.Configuration.GetConnectionString("Oracle"));
+                    // Exemplo para SQL Server:
+                    // options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+                });
+            }
 
             // AutoMapper
             builder.Services.AddAutoMapper(typeof(MappingProfile));

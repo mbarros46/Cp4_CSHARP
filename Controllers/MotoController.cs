@@ -53,7 +53,8 @@ namespace MottuCrudAPI.Controllers
         public async Task<ActionResult<MotoResponse>> Post([FromBody] MotoRequest dto, CancellationToken ct)
         {
             var created = await _svc.CreateAsync(dto, ct);
-            return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+            var version = HttpContext.GetRouteValue("version")?.ToString() ?? "1.0";
+            return CreatedAtAction(nameof(Get), new { version = version, id = created.Id }, created);
         }
 
     /// <summary>

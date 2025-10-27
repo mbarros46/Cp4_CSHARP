@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Application.DTOs;
 using Application.Services;
 
@@ -50,7 +51,9 @@ namespace MottuCrudAPI.Controllers
         public async Task<ActionResult<PatioResponse>> Post([FromBody] PatioRequest dto, CancellationToken ct)
         {
             var created = await _svc.CreateAsync(dto, ct);
-            return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+            // Inclui a versão atual da API nos route values para gerar a URL correta
+            var version = HttpContext.GetRouteValue("version")?.ToString() ?? "1.0";
+            return CreatedAtAction(nameof(Get), new { version = version, id = created.Id }, created);
         }
 
         /// <summary>
